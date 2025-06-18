@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TOEIC Practice Test</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f3f2ef;
+            min-height: 100vh;
+            color: #333;
+            display: flex;
+            height: 100vh;
+        }
+
+        .container {
+            display: flex;
+            width: 100%;
+            height: 100%;
+        }
+
+        .questions-panel {
+            flex: 2;
+            padding: 20px;
+            overflow-y: auto;
+            height: 100%;
+            min-height: 0;
+            background: #fff;
+            border-right: 1px solid #d3d3d3;
+        }
+
+        .control-panel {
+            flex: 1;
+            background: #fff;
+            padding: 20px;
+            border-radius: 0 10px 10px 0;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            height: 100%;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #d3d3d3;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #0073b1;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+
+        .timer-container {
+            display: flex;
+            flex-direction: row;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .timer {
+            background: #720618;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0, 115, 177, 0.2);
+            text-align: center;
+            flex: 1;
+            animation: pulse 2.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.04); }
+            100% { transform: scale(1); }
+        }
+
+        .btn {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-transform: none;
+            letter-spacing: normal;
+            background: #0073b1;
+            color: #fff;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .btn:hover {
+            background: #005e8c;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 94, 140, 0.3);
+        }
+
+        .btn-success {
+            background: #0073b1;
+        }
+
+        .btn-success:hover {
+            background: #005e8c;
+        }
+
+        .btn-warning {
+            background: #720618;
+        }
+
+        .btn-warning:hover {
+            background: #8a1125;
+        }
+
+        .button-row {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 5px;
+        }
+
+        .section {
+            background: #fff;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+
+        .section h2 {
+            color: #0073b1;
+            margin-bottom: 10px;
+            font-size: 1.5em;
+            text-align: left;
+            padding-bottom: 5px;
+            border-bottom: 1px solid #d3d3d3;
+            font-weight: 600;
+        }
+
+        .questions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+        }
+
+        .question-item {
+            background: #f7f7f7;
+            padding: 12px;
+            border-radius: 5px;
+            border: 1px solid #e0e0e0;
+            transition: all 0.2s ease;
+        }
+
+        .question-item:hover {
+            border-color: #0073b1;
+            box-shadow: 0 2px 6px rgba(0, 115, 177, 0.1);
+        }
+
+        .question-header {
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        .options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px;
+            border-radius: 4px;
+            transition: background-color 0.2s ease;
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background-color: #e6f2fa;
+        }
+
+        .option input[type="radio"] {
+            width: 14px;
+            height: 14px;
+            accent-color: #0073b1;
+        }
+
+        .option label {
+            cursor: pointer;
+            font-weight: 500;
+            color: #444;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 5px;
+            height: 6px;
+            margin: 10px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #0073b1;
+            border-radius: 5px;
+            transition: width 0.2s ease;
+        }
+
+        .question-board {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f7f7f7;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            max-height: 500px;
+            overflow-y: auto;
+            flex-grow: 1;
+        }
+
+        .question-board-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 4px;
+            justify-content: center;
+        }
+
+        .question-board-item {
+            width: 90%;
+            height: 40px;
+            border: 1px solid #d3d3d3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1em;
+            color: #333;
+            cursor: pointer;
+            min-width: 40px;
+        }
+
+        .question-board-item.selected {
+            background-color: #1c5360;
+            color: #e0dbdb;
+        }
+
+        .question-board-item:hover {
+            background-color: #e6f2fa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .modal-content h2 {
+            color: #0073b1;
+            margin-bottom: 10px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .modal-content p {
+            color: #444;
+            margin-bottom: 15px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .modal-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9em;
+            font-weight: 600;
+            cursor: pointer;
+            color: #fff;
+            width: 80px;
+        }
+
+        .modal-btn.confirm {
+            background: #0073b1;
+        }
+
+        .modal-btn.confirm:hover {
+            background: #005e8c;
+        }
+
+        .modal-btn.cancel {
+            background: #f5982a;
+        }
+
+        .modal-btn.cancel:hover {
+            background: #d87d1a;
+        }
+
+        @media only screen and (max-width: 1309px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            .questions-panel, .control-panel {
+                padding: 15px;
+            }
+            .section h2 {
+                font-size: 1.3em;
+            }
+            .timer {
+                font-size: 1em;
+                padding: 8px;
+            }
+            .question-item {
+                padding: 10px;
+            }
+            .question-header {
+                font-size: 0.9em;
+            }
+            .btn {
+                font-size: 0.75em;
+                padding: 5px 10px;
+            }
+            .modal-content {
+                padding: 15px;
+            }
+        }
+
+        @media only screen and (max-width: 1023px) {
+            .header h1 {
+                font-size: 1.6em;
+            }
+            .questions-panel, .control-panel {
+                padding: 12px;
+            }
+            .section h2 {
+                font-size: 1.2em;
+            }
+            .timer {
+                font-size: 0.9em;
+                padding: 7px;
+            }
+            .question-item {
+                padding: 8px;
+            }
+            .question-header {
+                font-size: 0.85em;
+            }
+            .btn {
+                font-size: 0.7em;
+                padding: 4px 8px;
+            }
+            .question-board {
+                max-height: 400px;
+            }
+            .question-board-item {
+                height: 35px;
+                font-size: 0.9em;
+                min-width: 35px;
+            }
+            .modal-content {
+                padding: 12px;
+            }
+            .modal-content h2 {
+                font-size: 1.1em;
+            }
+            .modal-btn {
+                font-size: 0.8em;
+                padding: 6px 12px;
+            }
+        }
+
+        @media only screen and (max-width: 767px) {
+            .container {
+                flex-direction: column;
+                height: auto;
+            }
+            .questions-panel, .control-panel {
+                flex: none;
+                width: 100%;
+                height: auto;
+                padding: 10px;
+            }
+            .control-panel {
+                border-radius: 10px;
+                margin-top: 10px;
+            }
+            .header h1 {
+                font-size: 1.4em;
+            }
+            .section h2 {
+                font-size: 1.1em;
+            }
+            .timer-container {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .timer {
+                font-size: 0.85em;
+                padding: 6px;
+            }
+            .question-item {
+                padding: 6px;
+            }
+            .question-header {
+                font-size: 0.8em;
+            }
+            .btn {
+                font-size: 0.65em;
+                padding: 4px 6px;
+            }
+            .question-board {
+                max-height: 350px;
+            }
+            .question-board-grid {
+                grid-template-columns: repeat(10, 1fr);
+            }
+            .question-board-item {
+                height: 30px;
+                font-size: 0.85em;
+                min-width: 30px;
+            }
+            .modal-content {
+                padding: 10px;
+                max-width: 350px;
+            }
+            .modal-content h2 {
+                font-size: 1em;
+            }
+            .modal-btn {
+                font-size: 0.75em;
+                padding: 5px 10px;
+            }
+        }
+
+        @media only screen and (max-width: 479px) {
+            .header h1 {
+                font-size: 1.2em;
+            }
+            .questions-panel, .control-panel {
+                padding: 8px;
+            }
+            .section h2 {
+                font-size: 1em;
+            }
+            .timer-container {
+                gap: 6px;
+            }
+            .timer {
+                font-size: 0.8em;
+                padding: 5px;
+            }
+            .question-item {
+                padding: 5px;
+            }
+            .question-header {
+                font-size: 0.75em;
+            }
+            .options {
+                grid-template-columns: 1fr;
+                gap: 4px;
+            }
+            .option {
+                padding: 4px;
+            }
+            .btn {
+                font-size: 0.6em;
+                padding: 3px 5px;
+            }
+            .question-board {
+                max-height: 300px;
+            }
+            .question-board-grid {
+                grid-template-columns: repeat(8, 1fr);
+            }
+            .question-board-item {
+                height: 25px;
+                font-size: 0.8em;
+                min-width: 25px;
+            }
+            .modal-content {
+                padding: 8px;
+                max-width: 300px;
+            }
+            .modal-content h2 {
+                font-size: 0.9em;
+            }
+            .modal-content p {
+                font-size: 0.8em;
+            }
+            .modal-btn {
+                font-size: 0.7em;
+                padding: 4px 8px;
+                width: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="questions-panel" id="questionsPanel">
+            <div class="section" id="listeningSection">
+                <h2>Listening Section (Questions 1-100)</h2>
+                <div class="questions-grid" id="listeningQuestions"></div>
+            </div>
+            <div class="section" id="readingSection">
+                <h2>Reading Section (Questions 101-200)</h2>
+                <div class="questions-grid" id="readingQuestions"></div>
+            </div>
+        </div>
+        <div class="control-panel">
+            <div class="header">
+                <h1>TOEIC Practice Test</h1>
+            </div>
+            <div class="timer-container">
+                <div class="timer" aria-live="polite">
+                    <div>Listening Timer</div>
+                    <div id="listeningTimer">45:00</div>
+                </div>
+                <div class="timer" aria-live="polite">
+                    <div>Reading Timer</div>
+                    <div id="readingTimer">75:00</div>
+                </div>
+            </div>
+            <div class="question-board">
+                <div class="question-board-grid" id="questionBoardGrid"></div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill" style="width: 0%" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+            <div class="button-row">
+                <button class="btn btn-primary" onclick="startListening()" aria-label="Start Listening Section">Start Listening</button>
+                <button class="btn btn-primary" onclick="startReading()" aria-label="Start Reading Section">Start Reading</button>
+            </div>
+            <div class="button-row">
+                <button class="btn btn-warning" onclick="pauseTest()" aria-label="Pause Test">Pause</button>
+                <button class="btn btn-warning" onclick="restartTime()" aria-label="Restart Timers">Restart Time</button>
+            </div>
+            <div class="button-row">
+                <button class="btn btn-warning" onclick="resetAnswers()" aria-label="Reset Answers">Reset Answers</button>
+                <button class="btn btn-success" onclick="downloadAnswers()" aria-label="Download Answer Sheet">Download</button>
+            </div>
+            <div id="modal" class="modal">
+                <div class="modal-content">
+                    <h2 id="modalTitle"></h2>
+                    <p id="modalMessage"></p>
+                    <div class="modal-buttons">
+                        <button class="modal-btn confirm" id="modalConfirm">OK</button>
+                        <button class="modal-btn cancel" id="modalCancel">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let userAnswers = {};
+        let listeningTimeLeft = 45 * 60;
+        let readingTimeLeft = 75 * 60;
+        let listeningTimer = null;
+        let readingTimer = null;
+        let currentSection = null;
+        let listeningLoaded = 0;
+        let readingLoaded = 0;
+        let modal = document.getElementById('modal');
+        let modalTitle = document.getElementById('modalTitle');
+        let modalMessage = document.getElementById('modalMessage');
+        let modalConfirm = document.getElementById('modalConfirm');
+        let modalCancel = document.getElementById('modalCancel');
+
+        // Debounce function to limit scroll event frequency
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        function initializeTest() {
+            loadState();
+            loadInitialQuestions();
+            setupLazyLoading();
+            updateQuestionBoard();
+        }
+
+        function loadState() {
+            const savedAnswers = localStorage.getItem('userAnswers');
+            if (savedAnswers) {
+                userAnswers = JSON.parse(savedAnswers);
+            }
+            listeningTimeLeft = parseInt(localStorage.getItem('listeningTimeLeft')) || 45 * 60;
+            readingTimeLeft = parseInt(localStorage.getItem('readingTimeLeft')) || 75 * 60;
+            updateTimerDisplay('listeningTimer', listeningTimeLeft);
+            updateTimerDisplay('readingTimer', readingTimeLeft);
+            updateProgress();
+        }
+
+        function loadInitialQuestions() {
+            const hasListeningAnswers = Object.keys(userAnswers).some(q => parseInt(q) <= 100);
+            const hasReadingAnswers = Object.keys(userAnswers).some(q => parseInt(q) > 100);
+            
+            if (hasListeningAnswers || Object.keys(userAnswers).length === 0) {
+                generateQuestions('listening', 1, 100, 10);
+            }
+            
+            if (hasReadingAnswers) {
+                generateQuestions('reading', 101, 200, 10);
+            }
+            
+            setTimeout(() => {
+                applySavedAnswers();
+            }, 100);
+        }
+
+        function applySavedAnswers() {
+            Object.keys(userAnswers).forEach(questionNum => {
+                const radio = document.querySelector(`input[name="q${questionNum}"][value="${userAnswers[questionNum]}"]`);
+                if (radio) {
+                    radio.checked = true;
+                }
+            });
+        }
+
+        function saveState() {
+            localStorage.setItem('userAnswers', JSON.stringify(userAnswers));
+            localStorage.setItem('listeningTimeLeft', listeningTimeLeft);
+            localStorage.setItem('readingTimeLeft', readingTimeLeft);
+            updateQuestionBoard();
+        }
+
+        function generateQuestions(section, start, end, initialLoad = 10) {
+            const container = document.getElementById(`${section}Questions`);
+            const loadEnd = Math.min(start + initialLoad - 1, end);
+            
+            for (let i = start; i <= loadEnd; i++) {
+                const questionDiv = createQuestionElement(i, section);
+                container.appendChild(questionDiv);
+            }
+            
+            if (section === 'listening') {
+                listeningLoaded = loadEnd;
+            } else {
+                readingLoaded = loadEnd - 100;
+            }
+        }
+
+        function setupLazyLoading() {
+            const questionsPanel = document.getElementById('questionsPanel');
+            const listeningContainer = document.getElementById('listeningQuestions');
+            const readingContainer = document.getElementById('readingQuestions');
+            
+            const lazyLoadQuestions = debounce(() => {
+                const scrollTop = questionsPanel.scrollTop;
+                const clientHeight = questionsPanel.clientHeight;
+                
+                // Get bounding rectangles for section containers
+                const listeningRect = listeningContainer.getBoundingClientRect();
+                const readingRect = readingContainer.getBoundingClientRect();
+                const panelRect = questionsPanel.getBoundingClientRect();
+                
+                // Calculate section positions relative to the panel
+                const listeningBottom = listeningRect.bottom - panelRect.top + scrollTop;
+                const readingBottom = readingRect.bottom - panelRect.top + scrollTop;
+
+                // Load Listening questions if near the bottom of the Listening section
+                if (currentSection === 'listening' && listeningLoaded < 100) {
+                    const isNearListeningBottom = scrollTop + clientHeight >= listeningBottom - 100;
+                    if (isNearListeningBottom) {
+                        const loadEnd = Math.min(listeningLoaded + 10, 100);
+                        for (let i = listeningLoaded + 1; i <= loadEnd; i++) {
+                            const questionDiv = createQuestionElement(i, 'listening');
+                            listeningContainer.appendChild(questionDiv);
+                        }
+                        listeningLoaded = loadEnd;
+                        setTimeout(() => {
+                            applySavedAnswers();
+                        }, 50);
+                    }
+                }
+
+                // Load Reading questions if near the bottom of the Reading section
+                if (currentSection === 'reading' && readingLoaded < 100) {
+                    const isNearReadingBottom = scrollTop + clientHeight >= readingBottom - 100;
+                    if (isNearReadingBottom) {
+                        const loadStart = readingLoaded + 101;
+                        const loadEnd = Math.min(loadStart + 9, 200);
+                        for (let i = loadStart; i <= loadEnd; i++) {
+                            const questionDiv = createQuestionElement(i, 'reading');
+                            readingContainer.appendChild(questionDiv);
+                        }
+                        readingLoaded = loadEnd - 100;
+                        setTimeout(() => {
+                            applySavedAnswers();
+                        }, 50);
+                    }
+                }
+            }, 200);
+
+            questionsPanel.addEventListener('scroll', lazyLoadQuestions);
+        }
+
+        function createQuestionElement(questionNum, section) {
+            const questionDiv = document.createElement('div');
+            questionDiv.className = 'question-item';
+            questionDiv.setAttribute('role', 'region');
+            questionDiv.setAttribute('aria-labelledby', `q${questionNum}-header`);
+            questionDiv.innerHTML = `
+                <div class="question-header" id="q${questionNum}-header">Question ${questionNum}</div>
+                <div class="options" role="radiogroup" aria-label="Options for question ${questionNum}">
+                    ${['A', 'B', 'C', 'D'].map(option => `
+                        <div class="option">
+                            <input type="radio" id="q${questionNum}${option}" name="q${questionNum}" value="${option}" 
+                                   onchange="recordAnswer(${questionNum}, '${option}')" aria-label="Option ${option}">
+                            <label for="q${questionNum}${option}">${option}</label>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            return questionDiv;
+        }
+
+        function recordAnswer(questionNum, answer) {
+            userAnswers[questionNum] = answer;
+            saveState();
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const totalQuestions = 200;
+            const answeredQuestions = Object.keys(userAnswers).length;
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            const progressFill = document.getElementById('progressFill');
+            progressFill.style.width = progress + '%';
+            progressFill.setAttribute('aria-valuenow', progress.toFixed(0));
+        }
+
+        function updateQuestionBoard() {
+            const grid = document.getElementById('questionBoardGrid');
+            grid.innerHTML = '';
+            for (let i = 1; i <= 200; i++) {
+                const item = document.createElement('div');
+                item.className = 'question-board-item';
+                item.textContent = i;
+                if (userAnswers[i]) {
+                    item.classList.add('selected');
+                }
+                item.onclick = () => scrollToQuestion(i);
+                grid.appendChild(item);
+            }
+        }
+
+        function scrollToQuestion(questionNum) {
+            const questionItem = document.querySelector(`#q${questionNum}-header`);
+            if (questionItem) {
+                questionItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            } else {
+                if (questionNum <= 100 && listeningLoaded < questionNum) {
+                    const listeningContainer = document.getElementById('listeningQuestions');
+                    for (let i = listeningLoaded + 1; i <= questionNum; i++) {
+                        const questionDiv = createQuestionElement(i, 'listening');
+                        listeningContainer.appendChild(questionDiv);
+                    }
+                    listeningLoaded = questionNum;
+                } else if (questionNum > 100 && readingLoaded < (questionNum - 100)) {
+                    const readingContainer = document.getElementById('readingQuestions');
+                    for (let i = readingLoaded + 101; i <= questionNum; i++) {
+                        const questionDiv = createQuestionElement(i, 'reading');
+                        readingContainer.appendChild(questionDiv);
+                    }
+                    readingLoaded = questionNum - 100;
+                }
+                setTimeout(() => {
+                    applySavedAnswers();
+                    const questionItem = document.querySelector(`#q${questionNum}-header`);
+                    if (questionItem) {
+                        questionItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }, 100);
+            }
+        }
+
+        function startListening() {
+            currentSection = 'listening';
+            if (listeningTimer) clearInterval(listeningTimer);
+            if (listeningLoaded === 0) {
+                generateQuestions('listening', 1, 100, 10);
+                setTimeout(() => {
+                    applySavedAnswers();
+                    document.getElementById('listeningSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+            listeningTimer = setInterval(() => {
+                listeningTimeLeft--;
+                updateTimerDisplay('listeningTimer', listeningTimeLeft);
+                saveState();
+                if (listeningTimeLeft <= 0) {
+                    clearInterval(listeningTimer);
+                    showModal('Time Up', 'Listening section time is up! Starting Reading section.', () => {
+                        startReading();
+                    });
+                }
+            }, 1000);
+        }
+
+        function startReading() {
+            currentSection = 'reading';
+            if (readingTimer) clearInterval(readingTimer);
+            if (readingLoaded === 0) {
+                generateQuestions('reading', 101, 200, 10);
+                setTimeout(() => {
+                    applySavedAnswers();
+                    document.getElementById('readingSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            }
+            readingTimer = setInterval(() => {
+                readingTimeLeft--;
+                updateTimerDisplay('readingTimer', readingTimeLeft);
+                saveState();
+                if (readingTimeLeft <= 0) {
+                    clearInterval(readingTimer);
+                    showModal('Time Up', 'Reading section time is up!', null);
+                }
+            }, 1000);
+        }
+
+        function pauseTest() {
+            if (listeningTimer) clearInterval(listeningTimer);
+            if (readingTimer) clearInterval(readingTimer);
+        }
+
+        function updateTimerDisplay(timerId, timeLeft) {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+            document.getElementById(timerId).textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+
+        function restartTime() {
+            showModal('Restart Timers', 'Are you sure you want to restart the timers? Select OK to reset timers only, or Cancel and confirm again to reset timers and progress.', () => {
+                listeningTimeLeft = 45 * 60;
+                readingTimeLeft = 75 * 60;
+                clearInterval(listeningTimer);
+                clearInterval(readingTimer);
+                updateTimerDisplay('listeningTimer', listeningTimeLeft);
+                updateTimerDisplay('readingTimer', readingTimeLeft);
+                saveState();
+            }, () => {
+                showModal('Reset Progress', 'Do you also want to reset your progress (clear all answers)? This cannot be undone.', () => {
+                    userAnswers = {};
+                    listeningTimeLeft = 45 * 60;
+                    readingTimeLeft = 75 * 60;
+                    clearInterval(listeningTimer);
+                    clearInterval(readingTimer);
+                    updateTimerDisplay('listeningTimer', listeningTimeLeft);
+                    updateTimerDisplay('readingTimer', readingTimeLeft);
+                    document.getElementById('progressFill').style.width = '0%';
+                    document.getElementById('progressFill').setAttribute('aria-valuenow', '0');
+                    saveState();
+                    document.getElementById('listeningQuestions').innerHTML = '';
+                    document.getElementById('readingQuestions').innerHTML = '';
+                    listeningLoaded = 0;
+                    readingLoaded = 0;
+                    loadInitialQuestions();
+                });
+            });
+        }
+
+        function resetAnswers() {
+            showModal('Reset Answers', 'Are you sure you want to reset all answers? This cannot be undone.', () => {
+                userAnswers = {};
+                saveState();
+                document.getElementById('progressFill').style.width = '0%';
+                document.getElementById('progressFill').setAttribute('aria-valuenow', '0');
+                document.getElementById('listeningQuestions').innerHTML = '';
+                document.getElementById('readingQuestions').innerHTML = '';
+                listeningLoaded = 0;
+                readingLoaded = 0;
+                loadInitialQuestions();
+            });
+        }
+
+        function downloadAnswers() {
+            const currentDate = new Date().toLocaleDateString();
+            const currentTime = new Date().toLocaleTimeString();
+
+            let content = `TOEIC PRACTICE TEST ANSWER SHEET\n`;
+            content += `================================\n`;
+            content += `Test Date: ${currentDate}\n`;
+            content += `Test Time: ${currentTime}\n`;
+            content += `Test Type: TOEIC Practice Test\n\n`;
+
+            content += `ANSWER SHEET\n`;
+            content += `===========\n\n`;
+
+            content += `LISTENING SECTION (Questions 1-100)\n`;
+            content += `-----------------------------------\n`;
+            for (let i = 1; i <= 100; i++) {
+                const answer = userAnswers[i] || 'Not answered';
+                content += `Q${i.toString().padStart(3, '0')}: ${answer}\n`;
+            }
+
+            content += `\nREADING SECTION (Questions 101-200)\n`;
+            content += `-----------------------------------\n`;
+            for (let i = 101; i <= 200; i++) {
+                const answer = userAnswers[i] || 'Not answered';
+                content += `Q${i}: ${answer}\n`;
+            }
+
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `TOEIC_Answer_Sheet_${currentDate.replace(/\//g, '-')}_${currentTime.replace(/:/g, '-')}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+
+        function showModal(title, message, confirmCallback, cancelCallback = null) {
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            modal.style.display = 'flex';
+            modalConfirm.onclick = () => {
+                modal.style.display = 'none';
+                if (confirmCallback) confirmCallback();
+            };
+            modalCancel.onclick = () => {
+                modal.style.display = 'none';
+                if (cancelCallback) cancelCallback();
+            };
+            modal.onkeydown = (e) => {
+                if (e.key === 'Escape') {
+                    modal.style.display = 'none';
+                    if (cancelCallback) cancelCallback();
+                }
+            };
+        }
+
+        document.addEventListener('DOMContentLoaded', initializeTest);
+    </script>
+</body>
+</html>
